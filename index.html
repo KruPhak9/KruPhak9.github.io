@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบประกบคู่แข่งขัน KOTH 5 - Crossword (Memory Session Mode)</title>
+    <title>ระบบประกบคู่แข่งขัน KOTH 5 - Crossword</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +36,7 @@
         <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold tracking-wide text-amber-400">ระบบประกบคู่แข่งขัน KOTH 5</h1>
-                <p class="text-slate-400 text-sm">โหมดหน่วยความจำชั่วคราว (สลับหน้าได้ ข้อมูลไม่หาย / รีเฟรชเว็บข้อมูลล้างทันที)</p>
+                <p class="text-slate-400 text-sm">โหมดหน่วยความจำชั่วคราว (รอบชิงชนะเลิศ Final 1 & 2 แบบไม่จำกัด Max Margin 🔥)</p>
             </div>
             <div class="flex gap-2">
                 <button onclick="exportData()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-lg">
@@ -123,6 +123,8 @@
                         <option value="3">เกมที่ 3 (Max Margin: 250)</option>
                         <option value="4">เกมที่ 4 (Max Margin: 250)</option>
                         <option value="5">เกมที่ 5 (Max Margin: 200)</option>
+                        <option value="F1">🥇 รอบชิงชนะเลิศ เกมที่ 1 (ไม่จำกัด Margin 🔥)</option>
+                        <option value="F2">🥇 รอบชิงชนะเลิศ เกมที่ 2 (ไม่จำกัด Margin 🔥)</option>
                     </select>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
@@ -164,7 +166,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                 <div>
                     <h2 class="text-xl font-bold text-amber-400">📊 ตารางสรุปอันดับคะแนนรวมสะสมเป็นทางการ</h2>
-                    <p class="text-xs text-slate-400">เรียงลำดับจาก: คะแนนรวม (ชนะ=2,เสมอ=1) ➔ ผลต่างรวมจำกัดเพดาน ➔ แต้มดิบรวมฝั่งเรา</p>
+                    <p class="text-xs text-slate-400">เรียงลำดับจาก: คะแนนรวม (ชนะ=2,เสมอ=1) ➔ ผลต่างรวม (เกมนัดชิงไม่จำกัดเพดาน) ➔ แต้มดิบรวมฝั่งเรา</p>
                 </div>
                 <button onclick="refreshStandings()" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-md border border-slate-600 text-sm font-medium transition">
                     🔄 อัปเดตข้อมูลตาราง
@@ -198,18 +200,17 @@
 
     <script>
         // โครงสร้างฐานข้อมูลหลักในหน่วยความจำ (In-Memory JavaScript State)
-        // ทุกครั้งที่เปิดเว็บหรือรีเฟรชเว็บ จะเป็นค่าว่างเปล่าเริ่มต้นเสมอกลไกนี้ตัด LocalStorage ออกทั้งหมดแล้วครับ
         let appState = {
             players: [],
             rounds: {
-                "1": [], "2": [], "3": [], "4": [], "5": []
+                "1": [], "2": [], "3": [], "4": [], "5": [], "F1": [], "F2": []
             }
         };
 
         let currentTab = 'players';
         let previousRound = "1";
 
-        // ฟังก์ชันสลับแท็บเมนู (ข้อมูลฝั่งกรอกคะแนนจะไม่หายเพราะจะทำการเซฟลงโครงสร้างตัวแปรในแอปก่อนเปลี่ยนหน้า)
+        // ฟังก์ชันสลับแท็บเมนู
         function switchTab(tabId) {
             if (currentTab === 'pairing') {
                 saveCurrentInputsToState(previousRound);
@@ -289,7 +290,7 @@
             if(confirm('คุณต้องการลบข้อมูลรายชื่อและผลคะแนนทั้งหมดใช่หรือไม่?')) {
                 appState = {
                     players: [],
-                    rounds: { "1": [], "2": [], "3": [], "4": [], "5": [] }
+                    rounds: { "1": [], "2": [], "3": [], "4": [], "5": [], "F1": [], "F2": [] }
                 };
                 renderPlayers();
                 renderMatches();
@@ -308,7 +309,6 @@
             renderMatches();
         }
 
-        // บันทึกคะแนนสดเข้าตัวแปรแอปพลิเคชันทันทีเมื่อผู้ใช้งานพิมพ์ (Real-time update)
         function saveCurrentInputsToState(roundId) {
             const targetRound = roundId || getCurrentRound();
             const tbody = document.getElementById('matchTableBody');
@@ -376,7 +376,11 @@
                 return;
             }
 
-            if (confirm(`คุณต้องการใช้ระบบคำนวณเพื่อประกบคู่อัตโนมัติในรอบเกมที่ ${currentRound} ใช่หรือไม่?`)) {
+            let roundLabel = currentRound;
+            if (currentRound === 'F1') roundLabel = "รอบชิงชนะเลิศ เกมที่ 1";
+            if (currentRound === 'F2') roundLabel = "รอบชิงชนะเลิศ เกมที่ 2";
+
+            if (confirm(`คุณต้องการใช้ระบบคำนวณเพื่อประกบคู่อัตโนมัติใน ${roundLabel} ใช่หรือไม่?`)) {
                 const standings = calculateStandings();
                 const tbody = document.getElementById('matchTableBody');
                 tbody.innerHTML = '';
@@ -420,9 +424,12 @@
                 };
             });
 
-            for (let r = 1; r <= 5; r++) {
-                const matches = appState.rounds[r.toString()] || [];
-                const maxMarginCap = r <= 4 ? 250 : 200;
+            const allRounds = ["1", "2", "3", "4", "5", "F1", "F2"];
+
+            allRounds.forEach(r => {
+                const matches = appState.rounds[r] || [];
+                // ค่าเพดานปกติ: เกม 5 คือ 200, เกม 1-4 คือ 250
+                const maxMarginCap = (r === "5") ? 200 : 250;
 
                 matches.forEach(m => {
                     if (statsMap[m.p1]) {
@@ -451,11 +458,12 @@
                             let rawDiff1 = m.score1 - m.score2;
                             let rawDiff2 = m.score2 - m.score1;
 
-                            let cappedDiff1 = Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff1));
-                            let cappedDiff2 = Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff2));
+                            // เช็กเงื่อนไข: หากเป็นรอบชิงชนะเลิศ (F1, F2) จะไม่มีการจำกัด Max Margin (ใช้ค่าดิบคำนวณสะสมทันที)
+                            let finalMargin1 = (r === "F1" || r === "F2") ? rawDiff1 : Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff1));
+                            let finalMargin2 = (r === "F1" || r === "F2") ? rawDiff2 : Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff2));
 
-                            s1.totalMargin += cappedDiff1;
-                            s2.totalMargin += cappedDiff2;
+                            s1.totalMargin += finalMargin1;
+                            s2.totalMargin += finalMargin2;
 
                             if (m.score1 > m.score2) {
                                 s1.wins += 1; s1.points += 2;
@@ -470,7 +478,7 @@
                         }
                     }
                 });
-            }
+            });
 
             let standingsList = Object.values(statsMap);
             standingsList.sort((a, b) => {
@@ -527,7 +535,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `KOTH5_Session_Backup_${new Date().toISOString().slice(0,10)}.json`);
+            downloadAnchor.setAttribute("download", `KOTH5_Uncapped_Finals_${new Date().toISOString().slice(0,10)}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -541,7 +549,7 @@
                     const parsedData = JSON.parse(reader.result);
                     if (parsedData.players && parsedData.rounds) {
                         appState = parsedData;
-                        alert('🎉 โหลดไฟล์สำรองข้อมูลเดิมคืนสู่ระบบเสร็จสิ้น!');
+                        alert('🎉 โหลดไฟล์สำรองข้อมูลนัดชิงแบบ Uncapped เสร็จสิ้น!');
                         renderPlayers();
                         renderMatches();
                         refreshStandings();
@@ -558,7 +566,7 @@
         }
 
         window.onload = function() {
-            renderPlayers(); // เริ่มต้นที่ระบบว่างเปล่า
+            renderPlayers();
         };
     </script>
 </body>
