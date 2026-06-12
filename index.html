@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบประกบคู่แข่งขัน KOTH 5 - Crossword</title>
+    <title>ระบบประกบคู่แข่งขัน KOTH 5 - Crossword (Finals Smart View)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +36,7 @@
         <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold tracking-wide text-amber-400">ระบบประกบคู่แข่งขัน KOTH 5</h1>
-                <p class="text-slate-400 text-sm">โหมดหน่วยความจำชั่วคราว (รอบชิงชนะเลิศ Final 1 & 2 แบบไม่จำกัด Max Margin 🔥)</p>
+                <p class="text-slate-400 text-sm">โหมดแอนิเมชันเปิดตารางนัดชิงอัตโนมัติเมื่อเข้าสู่รอบชิงชนะเลิศ 🏆</p>
             </div>
             <div class="flex gap-2">
                 <button onclick="exportData()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-lg">
@@ -106,7 +106,7 @@
                                 </tr>
                             </thead>
                             <tbody id="playerTableBody" class="text-sm divide-y divide-slate-700 bg-slate-900/20">
-                                </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -123,13 +123,13 @@
                         <option value="3">เกมที่ 3 (Max Margin: 250)</option>
                         <option value="4">เกมที่ 4 (Max Margin: 250)</option>
                         <option value="5">เกมที่ 5 (Max Margin: 200)</option>
-                        <option value="F1">🥇 รอบชิงชนะเลิศ เกมที่ 1 (ไม่จำกัด Margin 🔥)</option>
-                        <option value="F2">🥇 รอบชิงชนะเลิศ เกมที่ 2 (ไม่จำกัด Margin 🔥)</option>
+                        <option value="F1">🥇 รอบชิงชนะเลิศ เกมที่ 1 (ตารางแยกเด็ดขาด + ปลดล็อก Margin 🔥)</option>
+                        <option value="F2">🥇 รอบชิงชนะเลิศ เกมที่ 2 (ตารางแยกเด็ดขาด + ปลดล็อก Margin 🔥)</option>
                     </select>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
                     <button onclick="generateAutoPairing()" class="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">
-                        ⚡ จับคู่ตามอันดับล่าสุด (KOTH)
+                        ⚡ จับคู่ตามอันดับล่าสุด (KOTH / คู่ชิง)
                     </button>
                     <button onclick="addNewMatchField()" class="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">
                         ➕ เพิ่มโต๊ะแข่งขันเอง
@@ -151,7 +151,7 @@
                         </tr>
                     </thead>
                     <tbody id="matchTableBody" class="space-y-2">
-                        </tbody>
+                    </tbody>
                 </table>
                 <div id="noMatchesText" class="text-center text-slate-500 py-8 text-sm hidden">
                     ยังไม่มีข้อมูลการจับคู่สำหรับรอบนี้ กดปุ่มจับคู่ด้านบนหรือเพิ่มโต๊ะเพื่อเริ่มต้นกรอกคะแนน
@@ -162,41 +162,68 @@
             </div>
         </div>
 
-        <div id="content-standings" class="tab-content hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+        <div id="content-standings" class="tab-content hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700 space-y-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
-                    <h2 class="text-xl font-bold text-amber-400">📊 ตารางสรุปอันดับคะแนนรวมสะสมเป็นทางการ</h2>
-                    <p class="text-xs text-slate-400">เรียงลำดับจาก: คะแนนรวม (ชนะ=2,เสมอ=1) ➔ ผลต่างรวม (เกมนัดชิงไม่จำกัดเพดาน) ➔ แต้มดิบรวมฝั่งเรา</p>
+                    <h2 class="text-xl font-bold text-amber-400">📊 ตารางสรุปอันดับคะแนนการแข่งขันทางการ</h2>
+                    <p class="text-xs text-slate-400">รอบคัดเลือกแสดงผลตารางรวมปกติ | ตารางรอบชิงจะปรากฏขึ้นมาเมื่อเริ่มเปิดศึกนัดชิงชนะเลิศเท่านั้น</p>
                 </div>
                 <button onclick="refreshStandings()" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-md border border-slate-600 text-sm font-medium transition">
                     🔄 อัปเดตข้อมูลตาราง
                 </button>
             </div>
 
-            <div class="overflow-x-auto border border-slate-700 rounded-xl shadow-xl">
-                <table class="w-full text-center border-collapse">
-                    <thead>
-                        <tr class="bg-slate-950 border-b border-slate-700 text-slate-200 text-sm font-medium">
-                            <th class="p-3 w-16">อันดับ</th>
-                            <th class="p-3 w-18">รหัส</th>
-                            <th class="p-3 text-left">โรงเรียนที่เข้าแข่งขัน</th>
-                            <th class="p-3 text-left">รายชื่อนักเรียน</th>
-                            <th class="p-3 w-16">แข่ง</th>
-                            <th class="p-3 w-16 text-emerald-400 font-bold">ชนะ</th>
-                            <th class="p-3 w-16 text-amber-400 font-bold">เสมอ</th>
-                            <th class="p-3 w-16 text-red-400 font-bold">แพ้</th>
-                            <th class="p-3 w-24 bg-amber-900/60 text-amber-300 font-bold">คะแนนรวม</th>
-                            <th class="p-3 w-28 bg-slate-900 text-slate-200 font-bold">ผลต่างรวม</th>
-                            <th class="p-3 w-24">แต้มได้รวม</th>
-                            <th class="p-3 w-24 text-slate-400">แต้มเสียรวม</th>
-                        </tr>
-                    </thead>
-                    <tbody id="standingsTableBody" class="text-sm divide-y divide-slate-700 bg-slate-900/40">
+            <div id="finalsSection" class="hidden space-y-3">
+                <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">👑 ตารางคะแนนรอบชิงชนะเลิศ (Championship Standings)</h3>
+                <div class="overflow-x-auto border border-amber-900/60 rounded-xl shadow-xl bg-amber-950/10">
+                    <table class="w-full text-center border-collapse">
+                        <thead>
+                            <tr class="bg-amber-950/80 border-b border-amber-800 text-amber-200 text-sm font-medium">
+                                <th class="p-3 w-20">อันดับชิง</th>
+                                <th class="p-3 w-18">รหัส</th>
+                                <th class="p-3 text-left">โรงเรียนคู่ชิงชนะเลิศ</th>
+                                <th class="p-3 text-left">รายชื่อนักเรียน</th>
+                                <th class="p-3 w-16">แข่ง</th>
+                                <th class="p-3 w-16 text-emerald-400 font-bold">ชนะ</th>
+                                <th class="p-3 w-16 text-amber-400 font-bold">เสมอ</th>
+                                <th class="p-3 w-16 text-red-400 font-bold">แพ้</th>
+                                <th class="p-3 w-24 bg-amber-900/60 text-amber-100 font-bold">คะแนนชิง</th>
+                                <th class="p-3 w-28 bg-slate-900 text-slate-200 font-bold">ผลต่างชิง (Uncapped)</th>
+                                <th class="p-3 w-24">แต้มได้ชิง</th>
+                                <th class="p-3 w-32 text-slate-400 text-xs">อันดับเดิมรอบคัดเลือก</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finalsTableBody" class="text-sm divide-y divide-amber-900/40 bg-slate-900/40">
                         </tbody>
-                </table>
+                    </table>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h3 id="regularTitle" class="text-lg font-bold text-slate-300">📋 ตารางสรุปอันดับคะแนนสะสม</h3>
+                <div class="overflow-x-auto border border-slate-700 rounded-xl shadow-xl">
+                    <table class="w-full text-center border-collapse">
+                        <thead>
+                            <tr class="bg-slate-950 border-b border-slate-700 text-slate-200 text-sm font-medium">
+                                <th class="p-3 w-16">อันดับ</th>
+                                <th class="p-3 w-18">รหัส</th>
+                                <th class="p-3 text-left">โรงเรียนที่เข้าแข่งขัน</th>
+                                <th class="p-3 text-left">รายชื่อนักเรียน</th>
+                                <th class="p-3 w-16 text-emerald-400 font-bold">ชนะ</th>
+                                <th class="p-3 w-16 text-amber-400 font-bold">เสมอ</th>
+                                <th class="p-3 w-16 text-red-400 font-bold">แพ้</th>
+                                <th class="p-3 bg-slate-900 text-slate-200 font-bold">ผลต่างรวม</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standingsTableBody" class="text-sm divide-y divide-slate-700 bg-slate-900/40">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
+
+    <script src="exportsummary.js"></script>
 
     <script>
         // โครงสร้างฐานข้อมูลหลักในหน่วยความจำ (In-Memory JavaScript State)
@@ -206,7 +233,6 @@
                 "1": [], "2": [], "3": [], "4": [], "5": [], "F1": [], "F2": []
             }
         };
-
         let currentTab = 'players';
         let previousRound = "1";
 
@@ -218,12 +244,10 @@
 
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`content-${tabId}`).classList.remove('hidden');
-            
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-amber-600', 'text-white');
                 btn.classList.add('hover:bg-slate-800', 'text-slate-400');
             });
-            
             const activeBtn = document.getElementById(`tab-${tabId}`);
             activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-400');
             activeBtn.classList.add('bg-amber-600', 'text-white');
@@ -268,7 +292,6 @@
             const name = document.getElementById('pName').value.trim();
             const student1 = document.getElementById('pStudent1').value.trim();
             const student2 = document.getElementById('pStudent2').value.trim();
-
             if (appState.players.some(p => p.id === id)) {
                 alert('⚠️ รหัสผู้แข่งขันนี้มีอยู่ในระบบแล้ว โปรดตรวจสอบใหม่อีกครั้ง');
                 return;
@@ -321,7 +344,6 @@
                 const p2 = row.querySelector('.match-p2').value;
                 const score1Str = row.querySelector('.match-score1').value;
                 const score2Str = row.querySelector('.match-score2').value;
-
                 tempMatches.push({
                     p1: p1,
                     p2: p2,
@@ -338,12 +360,10 @@
             
             let p1Options = `<option value="">-- เลือกทีมแข่งที่ 1 --</option>`;
             let p2Options = `<option value="">-- เลือกทีมแข่งที่ 2 --</option><option value="bye" ${p2Id === 'bye' ? 'selected' : ''}>* ชนะบาย (Bye) *</option>`;
-            
             appState.players.forEach(p => {
                 p1Options += `<option value="${p.id}" ${p.id === p1Id ? 'selected' : ''}>[${p.id}] ${p.name}</option>`;
                 p2Options += `<option value="${p.id}" ${p.id === p2Id ? 'selected' : ''}>[${p.id}] ${p.name}</option>`;
             });
-
             const row = document.createElement('tr');
             row.className = "bg-slate-800/80 border-b border-slate-700/60 hover:bg-slate-700/40 transition text-center text-slate-100";
             row.innerHTML = `
@@ -371,6 +391,7 @@
 
         function generateAutoPairing() {
             const currentRound = getCurrentRound();
+            
             if (appState.players.length === 0) {
                 alert('โปรดเพิ่มรายชื่อผู้แข่งขันในระบบก่อนจัดอันดับ KOTH');
                 return;
@@ -381,15 +402,24 @@
             if (currentRound === 'F2') roundLabel = "รอบชิงชนะเลิศ เกมที่ 2";
 
             if (confirm(`คุณต้องการใช้ระบบคำนวณเพื่อประกบคู่อัตโนมัติใน ${roundLabel} ใช่หรือไม่?`)) {
-                const standings = calculateStandings();
+                const res = getFullStandings();
                 const tbody = document.getElementById('matchTableBody');
                 tbody.innerHTML = '';
 
-                for (let i = 0; i < standings.length; i += 2) {
-                    if (i + 1 < standings.length) {
-                        addNewMatchField(standings[i].id, standings[i+1].id, '', '');
-                    } else {
-                        addNewMatchField(standings[i].id, 'bye', '100', '0');
+                if (currentRound === 'F1' || currentRound === 'F2') {
+                    if (res.fullQualifying.length >= 2) {
+                        addNewMatchField(res.fullQualifying[0].id, res.fullQualifying[1].id, '', '');
+                    } else if (res.fullQualifying.length === 1) {
+                        addNewMatchField(res.fullQualifying[0].id, 'bye', '100', '0');
+                    }
+                } else {
+                    const standings = res.fullQualifying;
+                    for (let i = 0; i < standings.length; i += 2) {
+                        if (i + 1 < standings.length) {
+                            addNewMatchField(standings[i].id, standings[i+1].id, '', '');
+                        } else {
+                            addNewMatchField(standings[i].id, 'bye', '100', '0');
+                        }
                     }
                 }
                 saveCurrentInputsToState();
@@ -412,120 +442,214 @@
             }
         }
 
-        // ==================== ระบบประมวลผลจัดอันดับ (Standings) ====================
-        function calculateStandings() {
-            let statsMap = {};
-
+        // ==================== ระบบประมวลผลจัดอันดับ (Smart Split Engine) ====================
+        function getFullStandings() {
+            // 1. ประมวลผลรอบคัดเลือก (เกม 1 ถึง เกม 5)
+            let qualMap = {};
             appState.players.forEach(p => {
-                statsMap[p.id] = {
+                qualMap[p.id] = {
                     id: p.id, name: p.name, student1: p.student1, student2: p.student2,
                     played: 0, wins: 0, draws: 0, losses: 0,
                     points: 0, totalMargin: 0, totalScoreFor: 0, totalScoreAgainst: 0
                 };
             });
-
-            const allRounds = ["1", "2", "3", "4", "5", "F1", "F2"];
-
-            allRounds.forEach(r => {
+            const qualRounds = ["1", "2", "3", "4", "5"];
+            qualRounds.forEach(r => {
                 const matches = appState.rounds[r] || [];
-                // ค่าเพดานปกติ: เกม 5 คือ 200, เกม 1-4 คือ 250
                 const maxMarginCap = (r === "5") ? 200 : 250;
 
                 matches.forEach(m => {
-                    if (statsMap[m.p1]) {
-                        const s1 = statsMap[m.p1];
+                    if (qualMap[m.p1]) {
+                        const s1 = qualMap[m.p1];
                         
                         if (m.p2 === 'bye') {
-                            s1.played += 1;
-                            s1.wins += 1;
-                            s1.points += 2;
-                            s1.totalMargin += 100;
-                            s1.totalScoreFor += 100;
-                        } else if (statsMap[m.p2]) {
-                            if (m.score1 === '' || m.score2 === '' || isNaN(m.score1) || isNaN(m.score2)) {
-                                return; 
-                            }
+                            s1.played += 1; s1.wins += 1; s1.points += 2; s1.totalMargin += 100; s1.totalScoreFor += 100;
+                        } else if (qualMap[m.p2]) {
+                            if (m.score1 === '' || m.score2 === '' || isNaN(m.score1) || isNaN(m.score2)) return;
 
-                            const s2 = statsMap[m.p2];
-                            s1.played += 1;
-                            s2.played += 1;
-
-                            s1.totalScoreFor += m.score1;
-                            s1.totalScoreAgainst += m.score2;
-                            s2.totalScoreFor += m.score2;
-                            s2.totalScoreAgainst += m.score1;
+                            const s2 = qualMap[m.p2];
+                            s1.played += 1; s2.played += 1;
+                            s1.totalScoreFor += m.score1; s1.totalScoreAgainst += m.score2;
+                            s2.totalScoreFor += m.score2; s2.totalScoreAgainst += m.score1;
 
                             let rawDiff1 = m.score1 - m.score2;
                             let rawDiff2 = m.score2 - m.score1;
-
-                            // เช็กเงื่อนไข: หากเป็นรอบชิงชนะเลิศ (F1, F2) จะไม่มีการจำกัด Max Margin (ใช้ค่าดิบคำนวณสะสมทันที)
-                            let finalMargin1 = (r === "F1" || r === "F2") ? rawDiff1 : Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff1));
-                            let finalMargin2 = (r === "F1" || r === "F2") ? rawDiff2 : Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff2));
-
-                            s1.totalMargin += finalMargin1;
-                            s2.totalMargin += finalMargin2;
-
+                            s1.totalMargin += Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff1));
+                            s2.totalMargin += Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff2));
                             if (m.score1 > m.score2) {
-                                s1.wins += 1; s1.points += 2;
-                                s2.losses += 1;
+                                s1.wins += 1; s1.points += 2; s2.losses += 1;
                             } else if (m.score1 < m.score2) {
-                                s2.wins += 1; s2.points += 2;
-                                s1.losses += 1;
+                                s2.wins += 1; s2.points += 2; s1.losses += 1;
                             } else {
-                                s1.draws += 1; s1.points += 1;
-                                s2.draws += 1; s2.points += 1;
+                                s1.draws += 1; s1.points += 1; s2.draws += 1; s2.points += 1;
                             }
                         }
                     }
                 });
             });
 
-            let standingsList = Object.values(statsMap);
-            standingsList.sort((a, b) => {
+            // จัดลำดับคะแนนดิบของรอบคัดเลือก
+            let qualList = Object.values(qualMap).sort((a, b) => {
                 if (b.points !== a.points) return b.points - a.points;
                 if (b.totalMargin !== a.totalMargin) return b.totalMargin - a.totalMargin;
                 return b.totalScoreFor - a.totalScoreFor;
             });
+            // ตรวจสอบเงื่อนไขอัจฉริยะ: "จะโผล่ตารางชิงขึ้นมาเฉพาะเมื่ออยู่ในรอบชิง (F1, F2) หรือเริ่มบันทึกคะแนนรอบชิงแล้วเท่านั้น"
+            const currentRound = getCurrentRound();
+            const isFinalsStage = (currentRound === 'F1' || currentRound === 'F2' || 
+                                  (appState.rounds["F1"] && appState.rounds["F1"].length > 0) || 
+                                  (appState.rounds["F2"] && appState.rounds["F2"].length > 0));
+            // หากยังไม่ถึงรอบชิง ให้คืนค่าแบบตารางเดี่ยวปกติ (ทุกคนอยู่ในตารางคัดเลือกทั่วไป)
+            if (!isFinalsStage) {
+                return {
+                    finals: [],
+                    regular: qualList, // แสดงทุกคน รันอันดับ 1 เป็นต้นไป
+                    fullQualifying: qualList,
+                    isFinalsStage: false
+                };
+            }
 
-            return standingsList;
+            // ถ้าเข้าสู่รอบชิงแล้ว -> ดีดอันดับ 1 และ 2 ออกไปทำตารางใหม่
+            let finalistIds = [];
+            if (qualList.length > 0) finalistIds.push(qualList[0].id);
+            if (qualList.length > 1) finalistIds.push(qualList[1].id);
+
+            let finalsMap = {};
+            finalistIds.forEach((id, index) => {
+                let p = qualMap[id];
+                finalsMap[id] = {
+                    id: p.id, name: p.name, student1: p.student1, student2: p.student2,
+                    played: 0, wins: 0, draws: 0, losses: 0,
+                    points: 0, totalMargin: 0, totalScoreFor: 0, totalScoreAgainst: 0,
+                    qualRank: index + 1
+                };
+            });
+            // คำนวณเฉพาะรอบ F1 และ F2 สำหรับคู่ชิง (รีเซ็ตสถิติเริ่มต้นจาก 0 ใหม่หมด 🔥)
+            const finalRounds = ["F1", "F2"];
+            finalRounds.forEach(r => {
+                const matches = appState.rounds[r] || [];
+                matches.forEach(m => {
+                    if (finalsMap[m.p1] && finalsMap[m.p2]) {
+                        if (m.score1 === '' || m.score2 === '' || isNaN(m.score1) || isNaN(m.score2)) return;
+
+                        let s1 = finalsMap[m.p1];
+                        let s2 = finalsMap[m.p2];
+
+                        s1.played += 1; s2.played += 1;
+                        s1.totalScoreFor += m.score1; s1.totalScoreAgainst += m.score2;
+                        s2.totalScoreFor += m.score2; s2.totalScoreAgainst += m.score1;
+
+                        let rawDiff1 = m.score1 - m.score2;
+                        let rawDiff2 = m.score2 - m.score1;
+
+                        s1.totalMargin += rawDiff1; // นัดชิงไม่จำกัดเพดานคะแนนผลต่าง
+                        s2.totalMargin += rawDiff2;
+
+                        if (m.score1 > m.score2) {
+                            s1.wins += 1; s1.points += 2; s2.losses += 1;
+                        } else if (m.score1 < m.score2) {
+                            s2.wins += 1; s2.points += 2; s1.losses += 1;
+                        } else {
+                            s1.draws += 1; s1.points += 1; s2.draws += 1; s2.points += 1;
+                        }
+                    }
+                });
+            });
+
+            let finalsList = Object.values(finalsMap).sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                if (b.totalMargin !== a.totalMargin) return b.totalMargin - a.totalMargin;
+                if (b.totalScoreFor !== a.totalScoreFor) return b.totalScoreFor - a.totalScoreFor;
+                return a.qualRank - b.qualRank; // หากเสมอกันทุกอย่าง ให้สิทธิ์ทีมอันดับ 1 รอบคัดเลือกชนะ
+            });
+            // คัดกรองเอาอันดับอื่น ๆ (อันดับ 3 เป็นต้นไป) แสดงผลด้านล่างแยกไว้
+            let regularList = qualList.filter(p => !finalistIds.includes(p.id));
+            return {
+                finals: finalsList,
+                regular: regularList,
+                fullQualifying: qualList,
+                isFinalsStage: true
+            };
         }
 
         function refreshStandings() {
-            const standings = calculateStandings();
+            const res = getFullStandings();
+            const isFinalsStage = res.isFinalsStage;
+            
+            // ปรับเปลี่ยนชื่อหัวตารางล่างให้เหมาะสมกับรอบแข่งขันปัจจุบันแบบไดนามิก
+            const regularTitle = document.getElementById('regularTitle');
+            if (regularTitle) {
+                regularTitle.innerText = isFinalsStage 
+                    ? "📋 ตารางสรุปอันดับรอบปกติ / รอบคัดเลือก (Ranks 3+)" 
+                    : "📋 ตารางสรุปอันดับคะแนนสะสมรวม (รอบคัดเลือก เกมที่ 1-5)";
+            }
+
+            // --- เรนเดอร์ตารางที่ 1: ตารางคู่ชิงชนะเลิศ (แสดงเมื่อถึงรอบชิงเท่านั้น) ---
+            const finalsSection = document.getElementById('finalsSection');
+            const finalsTbody = document.getElementById('finalsTableBody');
+            finalsTbody.innerHTML = '';
+
+            if (isFinalsStage && res.finals.length > 0) {
+                finalsSection.classList.remove('hidden');
+                // แสดงตัวออกงาน
+                res.finals.forEach((row, index) => {
+                    const rank = index + 1;
+                    let rankIcon = rank === 1 ? "🥇 แชมป์" : "🥈 รองแชมป์";
+                    let rankClass = rank === 1 ? "bg-amber-500/20 text-amber-400 font-bold" : "text-slate-300";
+                    
+                    const st2Text = row.student2 ? `, ${row.student2}` : '';
+                    const studentsListStr = `${row.student1 || '-'}${st2Text}`;
+                    
+                    finalsTbody.innerHTML += `
+                        <tr class="hover:bg-amber-950/30 transition bg-slate-900/10">
+                            <td class="p-3 font-bold ${rankClass}">${rankIcon}</td>
+                            <td class="p-3 text-amber-400 font-semibold text-center">${row.id}</td>
+                            <td class="p-3 text-left font-bold text-slate-100">${row.name}</td>
+                            <td class="p-3 text-left text-slate-300 text-xs">${studentsListStr}</td>
+                            <td class="p-3 font-medium text-slate-300">${row.played}</td>
+                            <td class="p-3 text-emerald-400 font-semibold">${row.wins}</td>
+                            <td class="p-3 text-amber-400 font-semibold">${row.draws}</td>
+                            <td class="p-3 text-red-400">${row.losses}</td>
+                            <td class="p-3 bg-amber-900/40 font-bold text-amber-200">${row.points}</td>
+                            <td class="p-3 bg-slate-900 font-bold ${row.totalMargin >= 0 ? 'text-blue-400' : 'text-red-400'}">${row.totalMargin >= 0 ? '+' + row.totalMargin : row.totalMargin}</td>
+                            <td class="p-3 font-medium text-slate-300">${row.totalScoreFor}</td>
+                            <td class="p-3 text-slate-400 text-xs font-medium">อันดับ ${row.qualRank} รอบแรก</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                finalsSection.classList.add('hidden'); // ซ่อนตัวมิดชิดในรอบปกติ 1-5
+            }
+
+            // --- ส่วนเรนเดอร์ตารางที่ 2: ตารางสรุปอันดับรอบคัดเลือกทั่วไป ---
             const tbody = document.getElementById('standingsTableBody');
             tbody.innerHTML = '';
 
-            if (standings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-slate-500 text-center">ไม่มีข้อมูลในการนำมาจัดอันดับคะแนน</td></tr>`;
+            if (res.regular.length === 0 && res.finals.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-slate-500 text-center">ไม่มีข้อมูลในการนำมาจัดอันดับคะแนน</td></tr>`;
                 return;
             }
 
-            standings.forEach((row, index) => {
-                const rank = index + 1;
-                let rankClass = "text-slate-400";
-                
-                if(rank === 1) rankClass = "bg-amber-950/60 font-bold text-amber-400 text-lg rounded-sm";
-                if(rank === 2) rankClass = "bg-slate-800 font-bold text-slate-300";
-
+            res.regular.forEach((row, index) => {
+                // ถ้ารอบชิง: รันอันดับ 3, 4, 5... | ถ้ารอบปกติ: รันอันดับ 1, 2, 3... ตามปกติธรรมดา
+                const rank = isFinalsStage ? (index + 3) : (index + 1);
                 const st2Text = row.student2 ? `, ${row.student2}` : '';
                 const studentsListStr = `${row.student1 || '-'}${st2Text}`;
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/40 transition bg-slate-900/10">
-                        <td class="p-3 font-bold ${rankClass}">${rank}</td>
-                        <td class="p-3 text-slate-400 font-medium">${row.id}</td>
-                        <td class="p-3 text-left font-semibold text-slate-100">${row.name}</td>
-                        <td class="p-3 text-left text-slate-300 text-xs">${studentsListStr}</td>
-                        <td class="p-3 font-medium text-slate-300">${row.played}</td>
-                        <td class="p-3 text-emerald-400 font-semibold">${row.wins}</td>
-                        <td class="p-3 text-amber-400 font-semibold">${row.draws}</td>
-                        <td class="p-3 text-red-400">${row.losses}</td>
-                        <td class="p-3 bg-amber-950/40 font-bold text-amber-300">${row.points}</td>
-                        <td class="p-3 bg-slate-900 font-bold ${row.totalMargin >= 0 ? 'text-blue-400' : 'text-red-400'}">${row.totalMargin >= 0 ? '+' + row.totalMargin : row.totalMargin}</td>
-                        <td class="p-3 text-slate-300">${row.totalScoreFor}</td>
-                        <td class="p-3 text-slate-500">${row.totalScoreAgainst}</td>
-                    </tr>
-                `;
+                // แปลงโครงสร้าง Object ให้ตรงกับเงื่อนไขที่ exportsummary.js คาดหวัง
+                const playerData = {
+                    rank: rank,
+                    id: row.id,
+                    school: row.name,
+                    student_name: studentsListStr,
+                    win: row.wins,
+                    draw: row.draws,
+                    loss: row.losses,
+                    diff: row.totalMargin
+                };
+
+                // เรียกใช้งานฟังก์ชันจากไฟล์ exportsummary.js เพื่อวาดแถวตาราง
+                tbody.innerHTML += renderRow(playerData);
             });
         }
 
@@ -535,7 +659,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `KOTH5_Uncapped_Finals_${new Date().toISOString().slice(0,10)}.json`);
+            downloadAnchor.setAttribute("download", `KOTH5_Finals_SmartMode_${new Date().toISOString().slice(0,10)}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -549,7 +673,7 @@
                     const parsedData = JSON.parse(reader.result);
                     if (parsedData.players && parsedData.rounds) {
                         appState = parsedData;
-                        alert('🎉 โหลดไฟล์สำรองข้อมูลนัดชิงแบบ Uncapped เสร็จสิ้น!');
+                        alert('🎉 โหลดไฟล์ข้อมูลเรียบร้อยแล้ว! ระบบพร้อมแสดงผลตามสถานะรอบปัจจุบัน');
                         renderPlayers();
                         renderMatches();
                         refreshStandings();
