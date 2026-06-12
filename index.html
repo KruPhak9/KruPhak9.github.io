@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประกบคู่แข่งขัน KOTH 5 - Crossword</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans', 'Noto Sans Thai', sans-serif;
+            background-color: #f5f1e8; /* สีพื้นหลังสไตล์บอร์ดเกมสแครบบ์เบิล */
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen pb-12">
+
+    <header class="bg-gradient-to-r align-middle from-amber-700 to-amber-900 text-white shadow-md mb-6">
+        <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide">ระบบประกบคู่แข่งขัน KOTH 5</h1>
+                <p class="text-amber-200 text-sm">โปรแกรมจัดการและคำนวณคะแนนสำหรับการแข่งขัน Crossword / ครอสเวิร์ด มัธยมศึกษา</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="exportData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow">
+                    💾 สำรองข้อมูล (JSON)
+                </button>
+                <label class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow cursor-pointer">
+                    📂 โหลดข้อมูลไฟล์เก่า
+                    <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4">
+        <div class="flex border-b border-gray-300 mb-6 bg-white rounded-t-lg shadow-sm p-1 gap-1">
+            <button onclick="switchTab('players')" id="tab-players" class="tab-btn flex-1 py-3 text-center font-medium rounded-md bg-amber-600 text-white transition">
+                👥 จัดการรายชื่อผู้เล่น / โรงเรียน
+            </button>
+            <button onclick="switchTab('pairing')" id="tab-pairing" class="tab-btn flex-1 py-3 text-center font-medium rounded-md hover:bg-amber-100 text-slate-600 transition">
+                ⚔️ ประกบคู่และบันทึกผลการแข่งขัน
+            </button>
+            <button onclick="switchTab('standings')" id="tab-standings" class="tab-btn flex-1 py-3 text-center font-medium rounded-md hover:bg-amber-100 text-slate-600 transition">
+                📊 ตารางอันดับและคะแนนรวม
+            </button>
+        </div>
+
+        <div id="content-players" class="tab-content block bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 bg-slate-50 p-4 rounded-lg border border-slate-200 h-fit">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-3 border-b pb-2">➕ เพิ่มรายชื่อผู้แข่ง/โรงเรียน</h3>
+                    <form id="playerForm" onsubmit="addPlayer(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">รหัสผู้แข่งขัน (ID)</label>
+                            <input type="text" id="pId" required class="w-full border p-2 rounded-md focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">ชื่อโรงเรียน / ชื่อทีม</label>
+                            <input type="text" id="pName" required class="w-full border p-2 rounded-md focus:ring-2 focus:ring-amber-500 outline-none" placeholder="เช่น อยุธยาวิทยาลัย">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">สังกัด สพป. / สพม.</label>
+                            <input type="text" id="pAffiliation" required class="w-full border p-2 rounded-md focus:ring-2 focus:ring-amber-500 outline-none" placeholder="เช่น สพม.พระนครศรีอยุธยา">
+                        </div>
+                        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 rounded-md transition shadow">
+                            บันทึกเพิ่มรายชื่อ
+                        </button>
+                    </form>
+                </div>
+
+                <div class="md:col-span-2">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-slate-700">📋 รายชื่อนักกีฬาในปัจจุบัน (<span id="playerCount">0</span> โรงเรียน)</h3>
+                        <button onclick="clearAllPlayers()" class="text-red-600 hover:text-red-800 text-xs font-medium border border-red-200 px-2 py-1 rounded bg-red-50">ล้างข้อมูลผู้เล่นทั้งหมด</button>
+                    </div>
+                    <div class="overflow-x-auto border rounded-lg">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b text-slate-600 text-sm font-medium">
+                                    <th class="p-3 w-20">รหัส</th>
+                                    <th class="p-3">โรงเรียน</th>
+                                    <th class="p-3">สังกัด</th>
+                                    <th class="p-3 w-24 text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playerTableBody" class="text-sm divide-y">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-pairing" class="tab-content hidden bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start
