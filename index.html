@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประกบคู่แข่งขัน KOTH 5 - Crossword (Dark Theme)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans', 'Noto Sans Thai', sans-serif;
+            background-color: #0f172a; /* พื้นหลังสีเข้ม Slate 900 */
+        }
+        /* ปรับแต่งสกรอลบาร์ให้เข้ากับ Dark Mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen pb-12">
+
+    <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950 text-white shadow-xl border-b border-slate-800 mb-6">
+        <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide text-amber-400">ระบบประกบคู่แข่งขัน KOTH 5</h1>
+                <p class="text-slate-400 text-sm">โปรแกรมจัดการและคำนวณคะแนนสำหรับการแข่งขัน Crossword มัธยมศึกษา [Dark Edition]</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="exportData()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-lg">
+                    💾 สำรองข้อมูล (JSON)
+                </button>
+                <label class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1 shadow-lg cursor-pointer">
+                    📂 โหลดไฟล์สำรองเดิม
+                    <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4">
+        <div class="flex border-b border-slate-800 mb-6 bg-slate-950/60 rounded-t-lg p-1 gap-1 shadow-inner">
+            <button onclick="switchTab('players')" id="tab-players" class="tab-btn flex-1 py-3 text-center font-medium rounded-md bg-amber-600 text-white transition">
+                👥 จัดการรายชื่อผู้เล่น
+            </button>
+            <button onclick="switchTab('pairing')" id="tab-pairing" class="tab-btn flex-1 py-3 text-center font-medium rounded-md hover:bg-slate-800 text-slate-400 transition">
+                ⚔️ ประกบคู่และบันทึกผลคะแนน
+            </button>
+            <button onclick="switchTab('standings')" id="tab-standings" class="tab-btn flex-1 py-3 text-center font-medium rounded-md hover:bg-slate-800 text-slate-400 transition">
+                📊 ตารางอันดับและคะแนนรวม
+            </button>
+        </div>
+
+        <div id="content-players" class="tab-content block bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1 bg-slate-900/60 p-4 rounded-lg border border-slate-700 h-fit">
+                    <h3 class="text-lg font-semibold text-amber-400 mb-3 border-b border-slate-700 pb-2">➕ เพิ่มรายชื่อโรงเรียนและนักเรียน</h3>
+                    <form id="playerForm" onsubmit="addPlayer(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">รหัสผู้แข่งขัน (ID)</label>
+                            <input type="text" id="pId" required class="w-full bg-slate-950 border border-slate-700 text-white p-2 rounded-md focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">ชื่อโรงเรียน / ชื่อทีม</label>
+                            <input type="text" id="pName" required class="w-full bg-slate-950 border border-slate-700 text-white p-2 rounded-md focus:ring-2 focus:ring-amber-500 outline-none" placeholder="เช่น อยุธยาวิทยาลัย">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">ชื่อ-นามสกุล นักเรียนคนที่ 1</label>
+                            <input type="text" id="pStudent1" required class="w-full bg-slate-950 border border-slate-700 text-white p-2 rounded-md focus:ring-2 focus:ring-amber-500 outline-none" placeholder="ชื่อผู้เข้าแข่งขันคนที่ 1">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">ชื่อ-นามสกุล นักเรียนคนที่ 2 (ถ้ามี)</label>
+                            <input type="text" id="pStudent2" class="w-full bg-slate-950 border border-slate-700 text-white p-2 rounded-md focus:ring-2 focus:ring-amber-500 outline-none" placeholder="ชื่อผู้เข้าแข่งขันคนที่ 2 (ไม่บังคับ)">
+                        </div>
+                        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-md transition shadow-md">
+                            บันทึกรายชื่อผู้เข้าแข่ง
+                        </button>
+                    </form>
+                </div>
+
+                <div class="md:col-span-2">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-slate-200">📋 รายชื่อนักกีฬาในระบบ (<span id="playerCount" class="text-amber-400">0</span> โรงเรียน)</h3>
+                        <button onclick="clearAllPlayers()" class="text-red-400 hover:text-red-300 text-xs font-medium border border-red-900 px-2 py-1 rounded bg-red-950/40">ล้างรายชื่อทั้งหมด</button>
+                    </div>
+                    <div class="overflow-x-auto border border-slate-700 rounded-lg shadow-inner">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-300 border-b border-slate-700 text-sm font-medium">
+                                    <th class="p-3 w-20 text-center">รหัส</th>
+                                    <th class="p-3">โรงเรียน</th>
+                                    <th class="p-3">รายชื่อนักเรียน (สูงสุด 2 คน)</th>
+                                    <th class="p-3 w-24 text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playerTableBody" class="text-sm divide-y divide-slate-700 bg-slate-900/20">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-pairing" class="tab-content hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700 pb-4 mb-4 gap-4">
+                <div class="flex items-center gap-3">
+                    <label class="font-semibold text-slate-300">รอบการแข่งขันปัจจุบัน:</label>
+                    <select id="roundSelect" onchange="onRoundChange()" class="bg-slate-950 border border-slate-700 text-amber-400 p-2 rounded-md font-medium focus:ring-2 focus:ring-amber-500 outline-none">
+                        <option value="1">เกมที่ 1 (Max Margin: 250)</option>
+                        <option value="2">เกมที่ 2 (Max Margin: 250)</option>
+                        <option value="3">เกมที่ 3 (Max Margin: 250)</option>
+                        <option value="4">เกมที่ 4 (Max Margin: 250)</option>
+                        <option value="5">เกมที่ 5 (Max Margin: 200)</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="generateAutoPairing()" class="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">
+                        ⚡ จับคู่ตามอันดับล่าสุด (KOTH)
+                    </button>
+                    <button onclick="addNewMatchField()" class="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-md">
+                        ➕ เพิ่มโต๊ะแข่งขันเอง
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-700 rounded-xl bg-slate-900 p-4">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="text-slate-400 text-xs font-semibold tracking-wider uppercase border-b border-slate-700 pb-2 text-center">
+                            <th class="p-2 w-16">โต๊ะ</th>
+                            <th class="p-2 text-left">ผู้เข้าแข่งขันฝั่งที่ 1</th>
+                            <th class="p-2 w-32">แต้มได้</th>
+                            <th class="p-2 w-12">VS</th>
+                            <th class="p-2 w-32">แต้มได้</th>
+                            <th class="p-2 text-left">ผู้เข้าแข่งขันฝั่งที่ 2</th>
+                            <th class="p-2 w-16">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matchTableBody" class="space-y-2">
+                        </tbody>
+                </table>
+                <div id="noMatchesText" class="text-center text-slate-500 py-8 text-sm hidden">
+                    ยังไม่มีข้อมูลการจับคู่สำหรับรอบนี้ กดปุ่มจับคู่ด้านบนเพื่อเริ่มต้นงานแข่งขัน
+                </div>
+            </div>
+
+            <div class="mt-4 flex justify-end">
+                <button onclick="saveRoundScores()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition">
+                    💾 บันทึกและคำนวณคะแนนรอบนี้
+                </button>
+            </div>
+        </div>
+
+        <div id="content-standings" class="tab-content hidden bg-slate-800 p-6 rounded-xl shadow-xl border border-slate-700">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <div>
+                    <h2 class="text-xl font-bold text-amber-400">📊 ตารางสรุปอันดับคะแนนรวมสะสมเป็นทางการ</h2>
+                    <p class="text-xs text-slate-400">เรียงลำดับจาก: คะแนนรวม (ชนะ=2,เสมอ=1) ➔ ผลต่างรวมจำกัดเพดาน ➔ แต้มดิบรวมฝั่งเรา</p>
+                </div>
+                <button onclick="refreshStandings()" class="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-md border border-slate-600 text-sm font-medium transition">
+                    🔄 อัปเดตข้อมูลตาราง
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-700 rounded-xl shadow-xl">
+                <table class="w-full text-center border-collapse">
+                    <thead>
+                        <tr class="bg-slate-950 border-b border-slate-700 text-slate-200 text-sm font-medium">
+                            <th class="p-3 w-16">อันดับ</th>
+                            <th class="p-3 w-18">รหัส</th>
+                            <th class="p-3 text-left">โรงเรียนที่เข้าแข่งขัน</th>
+                            <th class="p-3 text-left">รายชื่อนักเรียน</th>
+                            <th class="p-3 w-16">แข่ง</th>
+                            <th class="p-3 w-16 text-emerald-400 font-bold">ชนะ</th>
+                            <th class="p-3 w-16 text-amber-400 font-bold">เสมอ</th>
+                            <th class="p-3 w-16 text-red-400 font-bold">แพ้</th>
+                            <th class="p-3 w-24 bg-amber-900/60 text-amber-300 font-bold">คะแนนรวม</th>
+                            <th class="p-3 w-28 bg-slate-900 text-slate-200 font-bold">ผลต่างรวม</th>
+                            <th class="p-3 w-24">แต้มได้รวม</th>
+                            <th class="p-3 w-24 text-slate-400">แต้มเสียรวม</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standingsTableBody" class="text-sm divide-y divide-slate-700 bg-slate-900/40">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // โครงสร้างฐานข้อมูลเริ่มต้น (ปรับเปลี่ยนโครงสร้างมารองรับชื่อนักเรียน 2 คน)
+        let appState = {
+            players: [
+                { id: "1", name: "จอมสุรางค์อุปถัมภ์", student1: "สมชาย รักเรียน", student2: "สมหญิง มุ่งมั่น" },
+                { id: "2", name: "ปากกรานพิทยา", affiliation: "สมศักดิ์ เก่งกาจ", student1: "สมศักดิ์ เก่งกาจ", student2: "" },
+                { id: "3", name: "อยุธยานุสรณ์", affiliation: "นที วารีร่วง", student1: "นที วารีร่วง", student2: "ปัญญา เลิศล้ำ" },
+                { id: "4", name: "อยุธยาวิทยาลัย", affiliation: "กิตติพงษ์ วงศ์ดี", student1: "กิตติพงษ์ วงศ์ดี", student2: "" }
+            ],
+            rounds: {
+                "1": [], "2": [], "3": [], "4": [], "5": []
+            }
+        };
+
+        // ฟังก์ชันการสลับแท็บเมนู
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-600', 'text-white');
+                btn.classList.add('hover:bg-slate-800', 'text-slate-400');
+            });
+            
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-400');
+            activeBtn.classList.add('bg-amber-600', 'text-white');
+
+            if (tabId === 'standings') refreshStandings();
+            if (tabId === 'pairing') renderMatches();
+        }
+
+        // ==================== ส่วนจัดการผู้เข้าแข่งขัน (Players) ====================
+        function renderPlayers() {
+            const tbody = document.getElementById('playerTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('playerCount').innerText = appState.players.length;
+
+            appState.players.forEach((p) => {
+                // จัดการแสดงรายชื่อนักเรียนแบบ 1 หรือ 2 คนให้สวยงาม
+                const student2Text = p.student2 ? `<br><span class="text-slate-400 text-xs">2. ${p.student2}</span>` : '';
+                const studentsDisplay = `<span class="text-slate-200">1. ${p.student1 || '-'}</span>${student2Text}`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/60 transition bg-slate-900/10">
+                        <td class="p-3 font-semibold text-amber-400 text-center">${p.id}</td>
+                        <td class="p-3 font-medium text-slate-100">${p.name}</td>
+                        <td class="p-3 text-slate-300">${studentsDisplay}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deletePlayer('${p.id}')" class="text-red-400 hover:text-red-300 font-medium text-xs">🗑️ ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addPlayer(e) {
+            e.preventDefault();
+            const id = document.getElementById('pId').value.trim();
+            const name = document.getElementById('pName').value.trim();
+            const student1 = document.getElementById('pStudent1').value.trim();
+            const student2 = document.getElementById('pStudent2').value.trim();
+
+            if (appState.players.some(p => p.id === id)) {
+                alert('⚠️ รหัสผู้แข่งขันนี้มีอยู่ในระบบแล้ว โปรดตรวจสอบใหม่อีกครั้ง');
+                return;
+            }
+
+            appState.players.push({ id, name, student1, student2 });
+            document.getElementById('playerForm').reset();
+            renderPlayers();
+        }
+
+        function deletePlayer(id) {
+            if(confirm('คุณต้องการลบรายชื่อผู้แข่งขันนี้ใช่หรือไม่?')) {
+                appState.players = appState.players.filter(p => p.id !== id);
+                renderPlayers();
+            }
+        }
+
+        function clearAllPlayers() {
+            if(confirm('⚠️ คำเตือน: คุณต้องการลบรายชื่อนักกีฬาทั้งหมดออกจากระบบใช่หรือไม่? ข้อมูลเก่าจะหายหมด')) {
+                appState.players = [];
+                renderPlayers();
+            }
+        }
+
+        // ==================== ส่วนจัดการบันทึกและประกบคู่แข่งขัน (Pairing) ====================
+        function getCurrentRound() {
+            return document.getElementById('roundSelect').value;
+        }
+
+        function onRoundChange() {
+            renderMatches();
+        }
+
+        function addNewMatchField(p1Id = '', p2Id = '', score1 = '', score2 = '') {
+            const tbody = document.getElementById('matchTableBody');
+            const tableId = tbody.children.length + 1;
+            
+            let p1Options = `<option value="">-- เลือกทีมแข่งที่ 1 --</option>`;
+            let p2Options = `<option value="">-- เลือกทีมแข่งที่ 2 --</option><option value="bye" ${p2Id === 'bye' ? 'selected' : ''}>* ชนะบาย (Bye) *</option>`;
+            
+            appState.players.forEach(p => {
+                p1Options += `<option value="${p.id}" ${p.id === p1Id ? 'selected' : ''}>[${p.id}] ${p.name}</option>`;
+                p2Options += `<option value="${p.id}" ${p.id === p2Id ? 'selected' : ''}>[${p.id}] ${p.name}</option>`;
+            });
+
+            const row = document.createElement('tr');
+            row.className = "bg-slate-800/80 border-b border-slate-700/60 hover:bg-slate-700/40 transition text-center text-slate-100";
+            row.innerHTML = `
+                <td class="p-2 font-bold text-slate-400 bg-slate-950/60">${tableId}</td>
+                <td class="p-2 text-left">
+                    <select class="match-p1 bg-slate-900 border border-slate-700 p-1.5 rounded w-full text-sm text-slate-100 focus:ring-1 focus:ring-amber-500 outline-none">${p1Options}</select>
+                </td>
+                <td class="p-2">
+                    <input type="number" class="match-score1 bg-slate-950 border border-slate-700 p-1.5 rounded w-full text-center font-bold text-blue-400 focus:ring-1 focus:ring-blue-500 outline-none" value="${score1}">
+                </td>
+                <td class="p-2 text-xs font-bold text-slate-500">VS</td>
+                <td class="p-2">
+                    <input type="number" class="match-score2 bg-slate-950 border border-slate-700 p-1.5 rounded w-full text-center font-bold text-orange-400 focus:ring-1 focus:ring-orange-500 outline-none" value="${score2}">
+                </td>
+                <td class="p-2 text-left">
+                    <select class="match-p2 bg-slate-900 border border-slate-700 p-1.5 rounded w-full text-sm text-slate-100 focus:ring-1 focus:ring-amber-500 outline-none">${p2Options}</select>
+                </td>
+                <td class="p-2">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-slate-500 hover:text-red-400 transition">❌</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            document.getElementById('noMatchesText').classList.add('hidden');
+        }
+
+        function generateAutoPairing() {
+            const currentRound = getCurrentRound();
+            if (appState.players.length === 0) {
+                alert('โปรดเพิ่มรายชื่อผู้แข่งขันในระบบก่อนจัดอันดับ');
+                return;
+            }
+
+            if (confirm(`คุณต้องการใช้ระบบคำนวณเพื่อประกบคู่อัตโนมัติในรอบเกมที่ ${currentRound} ใช่หรือไม่?`)) {
+                const standings = calculateStandings();
+                const tbody = document.getElementById('matchTableBody');
+                tbody.innerHTML = '';
+
+                for (let i = 0; i < standings.length; i += 2) {
+                    if (i + 1 < standings.length) {
+                        addNewMatchField(standings[i].id, standings[i+1].id, '', '');
+                    } else {
+                        addNewMatchField(standings[i].id, 'bye', '100', '0');
+                    }
+                }
+            }
+        }
+
+        function renderMatches() {
+            const currentRound = getCurrentRound();
+            const tbody = document.getElementById('matchTableBody');
+            tbody.innerHTML = '';
+            
+            const savedMatches = appState.rounds[currentRound] || [];
+            if (savedMatches.length === 0) {
+                document.getElementById('noMatchesText').classList.remove('hidden');
+            } else {
+                document.getElementById('noMatchesText').classList.add('hidden');
+                savedMatches.forEach(m => {
+                    addNewMatchField(m.p1, m.p2, m.score1, m.score2);
+                });
+            }
+        }
+
+        function saveRoundScores() {
+            const currentRound = parseInt(getCurrentRound());
+            const tbody = document.getElementById('matchTableBody');
+            const rows = tbody.querySelectorAll('tr');
+            
+            let tempMatches = [];
+            for (let row of rows) {
+                const p1 = row.querySelector('.match-p1').value;
+                const p2 = row.querySelector('.match-p2').value;
+                const score1Str = row.querySelector('.match-score1').value;
+                const score2Str = row.querySelector('.match-score2').value;
+
+                if (!p1 || !p2) {
+                    alert('⚠️ กรุณาเลือกข้อมูลโรงเรียนประจำโต๊ะแข่งขันให้ครบทุกช่อง');
+                    return;
+                }
+                if (p1 === p2) {
+                    alert('⚠️ ข้อผิดพลาด: ไม่สามารถตั้งให้โรงเรียนแข่งขันกับตัวเองได้');
+                    return;
+                }
+
+                tempMatches.push({
+                    p1: p1,
+                    p2: p2,
+                    score1: score1Str !== '' ? parseInt(score1Str) : 0,
+                    score2: score2Str !== '' ? parseInt(score2Str) : 0
+                });
+            }
+
+            appState.rounds[currentRound.toString()] = tempMatches;
+            alert(`✅ บันทึกคะแนนและคำนวณผลควบคุมรอบที่ ${currentRound} เข้าสู่ฐานข้อมูลเรียบร้อยแล้ว!`);
+            refreshStandings();
+        }
+
+        // ==================== ระบบประมวลผลสูตรคำนวณจริงตามเพดานไฟล์ Excel ====================
+        function calculateStandings() {
+            let statsMap = {};
+
+            appState.players.forEach(p => {
+                statsMap[p.id] = {
+                    id: p.id, name: p.name, student1: p.student1, student2: p.student2,
+                    played: 0, wins: 0, draws: 0, losses: 0,
+                    points: 0, totalMargin: 0, totalScoreFor: 0, totalScoreAgainst: 0
+                };
+            });
+
+            for (let r = 1; r <= 5; r++) {
+                const matches = appState.rounds[r.toString()] || [];
+                const maxMarginCap = r <= 4 ? 250 : 200;
+
+                matches.forEach(m => {
+                    if (statsMap[m.p1]) {
+                        const s1 = statsMap[m.p1];
+                        s1.played += 1;
+                        
+                        if (m.p2 === 'bye') {
+                            s1.wins += 1;
+                            s1.points += 2;
+                            s1.totalMargin += 100;
+                            s1.totalScoreFor += 100;
+                        } else if (statsMap[m.p2]) {
+                            const s2 = statsMap[m.p2];
+                            s2.played += 1;
+
+                            s1.totalScoreFor += m.score1;
+                            s1.totalScoreAgainst += m.score2;
+                            s2.totalScoreFor += m.score2;
+                            s2.totalScoreAgainst += m.score1;
+
+                            let rawDiff1 = m.score1 - m.score2;
+                            let rawDiff2 = m.score2 - m.score1;
+
+                            let cappedDiff1 = Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff1));
+                            let cappedDiff2 = Math.max(-maxMarginCap, Math.min(maxMarginCap, rawDiff2));
+
+                            s1.totalMargin += cappedDiff1;
+                            s2.totalMargin += cappedDiff2;
+
+                            if (m.score1 > m.score2) {
+                                s1.wins += 1; s1.points += 2;
+                                s2.losses += 1;
+                            } else if (m.score1 < m.score2) {
+                                s2.wins += 1; s2.points += 2;
+                                s1.losses += 1;
+                            } else {
+                                s1.draws += 1; s1.points += 1;
+                                s2.draws += 1; s2.points += 1;
+                            }
+                        }
+                    }
+                });
+            }
+
+            let standingsList = Object.values(statsMap);
+            standingsList.sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                if (b.totalMargin !== a.totalMargin) return b.totalMargin - a.totalMargin;
+                return b.totalScoreFor - a.totalScoreFor;
+            });
+
+            return standingsList;
+        }
+
+        function refreshStandings() {
+            const standings = calculateStandings();
+            const tbody = document.getElementById('standingsTableBody');
+            tbody.innerHTML = '';
+
+            if (standings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-slate-500 text-center">ไม่มีข้อมูลของโรงเรียนผู้แข่งขันในการนำมาประมวลอันดับ</td></tr>`;
+                return;
+            }
+
+            standings.forEach((row, index) => {
+                const rank = index + 1;
+                let rankClass = "text-slate-400";
+                
+                if(rank === 1) rankClass = "bg-amber-950/60 font-bold text-amber-400 text-lg rounded-sm";
+                if(rank === 2) rankClass = "bg-slate-800 font-bold text-slate-300";
+
+                const st2Text = row.student2 ? `, ${row.student2}` : '';
+                const studentsListStr = `${row.student1 || '-'}${st2Text}`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition bg-slate-900/10">
+                        <td class="p-3 font-bold ${rankClass}">${rank}</td>
+                        <td class="p-3 text-slate-400 font-medium">${row.id}</td>
+                        <td class="p-3 text-left font-semibold text-slate-100">${row.name}</td>
+                        <td class="p-3 text-left text-slate-300 text-xs">${studentsListStr}</td>
+                        <td class="p-3 font-medium text-slate-300">${row.played}</td>
+                        <td class="p-3 text-emerald-400 font-semibold">${row.wins}</td>
+                        <td class="p-3 text-amber-400 font-semibold">${row.draws}</td>
+                        <td class="p-3 text-red-400">${row.losses}</td>
+                        <td class="p-3 bg-amber-950/40 font-bold text-amber-300">${row.points}</td>
+                        <td class="p-3 bg-slate-900 font-bold ${row.totalMargin >= 0 ? 'text-blue-400' : 'text-red-400'}">${row.totalMargin >= 0 ? '+' + row.totalMargin : row.totalMargin}</td>
+                        <td class="p-3 text-slate-300">${row.totalScoreFor}</td>
+                        <td class="p-3 text-slate-500">${row.totalScoreAgainst}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ==================== ระบบสำรองไฟล์ Backup ข้อมูลระบบด้วยรูปแบบ JSON ====================
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `KOTH5_Crossword_DarkBackup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importData(event) {
+            const input = event.target;
+            const reader = new FileReader();
+            reader.onload = function() {
+                try {
+                    const parsedData = JSON.parse(reader.result);
+                    if (parsedData.players && parsedData.rounds) {
+                        appState = parsedData;
+                        alert('🎉 ระบบกู้คืนข้อมูลนักกีฬาและคะแนนการแข่งเก่าจากไฟล์ JSON สำเร็จเรียบร้อย!');
+                        renderPlayers();
+                        renderMatches();
+                        refreshStandings();
+                    } else {
+                        alert('⚠️ โครงสร้างไฟล์ไม่ถูกต้องกรุณาเลือกไฟล์ Backup ที่ออกไปจากเว็ปนี้เท่านั้น');
+                    }
+                } catch (e) {
+                    alert('❌ เกิดข้อผิดพลาดในการเปิดอ่านไฟล์ โปรดมั่นใจว่าเลือกไฟล์นามสกุล .json');
+                }
+            };
+            if(input.files[0]) {
+                reader.readAsText(input.files[0]);
+            }
+        }
+
+        window.onload = function() {
+            renderPlayers();
+        };
+    </script>
+</body>
+</html>
